@@ -1,5 +1,5 @@
+import 'package:app/screens/login_screen.dart';
 import 'package:flutter/material.dart';
-import 'login_screen.dart'; // Make sure this exists
 
 class RegisterScreen extends StatefulWidget {
   @override
@@ -7,195 +7,206 @@ class RegisterScreen extends StatefulWidget {
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  final _emailController = TextEditingController();
-  final _passwordController = TextEditingController();
-  final _confirmController = TextEditingController();
+  final _nameController = TextEditingController();
+  final _phoneController = TextEditingController();
   bool _isLoading = false;
+  bool _agreedToTerms = false;
 
-  void _register() {
+  void _sendOtp() {
+    if (!_agreedToTerms) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Please agree to the terms and conditions")),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
-
     Future.delayed(Duration(seconds: 2), () {
       setState(() => _isLoading = false);
-
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Registered as ${_emailController.text}')),
-      );
-
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => LoginScreen()),
+        SnackBar(content: Text('OTP sent to ${_phoneController.text}')),
       );
     });
-  }
-
-  Widget _buildSocialIcon(String imagePath) {
-    return Container(
-      height: 50,
-      width: 50,
-      padding: EdgeInsets.all(10),
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.grey.shade300),
-      ),
-      child: Image.asset(imagePath),
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.white,
-      body: Center(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 32, vertical: 24),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              // Logo + Name
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Image.asset(
-                    'assets/images/logo.png',
-                    height: 50,
+      body: SafeArea(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            // Top Logo and App Name
+            Column(
+              children: [
+                SizedBox(height: 100),
+                Image.asset(
+                  "assets/images/logo.png",
+                  height: 200,
+                  color: Colors.blue,
+                ),
+                SizedBox(height: 10),
+                Text(
+                  "Labsmart",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
                     color: Colors.blue,
                   ),
-                  SizedBox(width: 12),
-                  Text(
-                    'Labsmart',
-                    style: TextStyle(
-                      fontSize: 28,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.blue,
-                    ),
-                  ),
-                ],
-              ),
-              SizedBox(height: 40),
-
-              // Email
-              TextField(
-                controller: _emailController,
-                decoration: InputDecoration(
-                  labelText: 'Email',
-                  labelStyle: TextStyle(color: Colors.blue[700]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue[700]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
                 ),
-              ),
-              SizedBox(height: 20),
+              ],
+            ),
 
-              // Password
-              TextField(
-                controller: _passwordController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Password',
-                  labelStyle: TextStyle(color: Colors.blue[700]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue[700]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Confirm Password
-              TextField(
-                controller: _confirmController,
-                obscureText: true,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Password',
-                  labelStyle: TextStyle(color: Colors.blue[700]),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide: BorderSide(color: Colors.blue[700]!),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-
-              // Register Button
-              SizedBox(
-                width: double.infinity,
-                height: 50,
-                child: ElevatedButton(
-                  onPressed: _isLoading ? null : _register,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.blue[700],
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
-                  child:
-                      _isLoading
-                          ? CircularProgressIndicator(color: Colors.white)
-                          : Text('Register', style: TextStyle(fontSize: 18)),
-                ),
-              ),
-
-              SizedBox(height: 20),
-
-              // Already have account?
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
+            // Registration Form
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 32),
+              child: Column(
                 children: [
-                  Text('Already have an account?'),
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(builder: (_) => LoginScreen()),
-                      );
-                    },
-                    child: Text(
-                      'Login',
-                      style: TextStyle(
-                        color: Colors.blue[700],
-                        fontWeight: FontWeight.bold,
+                  _buildTextField("Full Name", _nameController),
+                  SizedBox(height: 15),
+                  _buildTextField(
+                    "Phone Number",
+                    _phoneController,
+                    keyboard: TextInputType.phone,
+                  ),
+                  SizedBox(height: 15),
+
+                  // Terms & Conditions
+                  Row(
+                    children: [
+                      Checkbox(
+                        value: _agreedToTerms,
+                        onChanged: (value) {
+                          setState(() => _agreedToTerms = value!);
+                        },
                       ),
+                      Expanded(
+                        child: Text(
+                          "I agree to the Terms and Conditions",
+                          style: TextStyle(fontSize: 14),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // Send OTP
+                  SizedBox(height: 10),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      onPressed: _isLoading ? null : _sendOtp,
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.blue[700],
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                      child:
+                          _isLoading
+                              ? CircularProgressIndicator(color: Colors.white)
+                              : Text(
+                                'Send OTP',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  color: Colors.white,
+                                ),
+                              ),
                     ),
                   ),
-                ],
-              ),
 
-              SizedBox(height: 30),
+                  SizedBox(height: 16),
 
-              // Social login
-              Column(
-                children: [
-                  Text(
-                    'Or register with',
-                    style: TextStyle(color: Colors.grey[700], fontSize: 14),
-                  ),
-                  SizedBox(height: 12),
+                  // Already have account?
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildSocialIcon('assets/images/google.png'),
-                      SizedBox(width: 24),
-                      _buildSocialIcon('assets/images/facebook.png'),
-                      SizedBox(width: 24),
-                      _buildSocialIcon('assets/images/apple.png'),
+                      Text(
+                        "Already have an account?",
+                        style: TextStyle(color: Colors.black87),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pushReplacement(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => LoginScreen(),
+                            ),
+                          );
+                        },
+                        child: Text(
+                          'Login',
+                          style: TextStyle(
+                            color: Colors.blue[700],
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  SizedBox(height: 10),
+                  Text(
+                    "or sign up with",
+                    style: TextStyle(color: Colors.grey[700]),
+                  ),
+                  SizedBox(height: 20),
+
+                  // Social Icons
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      _buildSocialIcon("assets/images/google.png"),
+                      SizedBox(width: 20),
+                      _buildSocialIcon("assets/images/facebook.png"),
+                      SizedBox(width: 20),
+                      _buildSocialIcon("assets/images/apple.png"),
                     ],
                   ),
                 ],
               ),
-            ],
-          ),
+            ),
+
+            // Spacer
+            SizedBox(height: 40),
+          ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    String label,
+    TextEditingController controller, {
+    TextInputType keyboard = TextInputType.text,
+  }) {
+    return TextField(
+      controller: controller,
+      keyboardType: keyboard,
+      decoration: InputDecoration(
+        labelText: label,
+        labelStyle: TextStyle(color: Colors.black),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(10)),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Colors.black),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSocialIcon(String imagePath) {
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        height: 50,
+        width: 50,
+        padding: EdgeInsets.all(10),
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          border: Border.all(color: Colors.grey.shade300),
+        ),
+        child: Image.asset(imagePath, height: 50, width: 50),
       ),
     );
   }
